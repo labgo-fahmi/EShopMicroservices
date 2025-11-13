@@ -1,9 +1,3 @@
-using BuildingBlocks.CQRS;
-
-using Catalog.API.Models;
-
-using Mapster;
-
 namespace Catalog.API.Products.CreateProduct
 {
     public record CreateProductCommand : ICommand<ProductCommandCreateResultDto>
@@ -25,16 +19,15 @@ namespace Catalog.API.Products.CreateProduct
         public decimal Price { get; set; } = 0;
     }
 
-    public class CreateProductHandler : ICommandHandler<CreateProductCommand, ProductCommandCreateResultDto>
+    public class CreateProductHandler(IDocumentSession session) : ICommandHandler<CreateProductCommand, ProductCommandCreateResultDto>
     {
-        public Task<ProductCommandCreateResultDto> Handle(CreateProductCommand command, CancellationToken cancellationToken)
+        public async Task<ProductCommandCreateResultDto> Handle(CreateProductCommand command, CancellationToken cancellationToken)
         {
             var newProduct = command.Adapt<Product>();
             newProduct.Id = Guid.NewGuid();
-            // Save to DB
-            return Task.FromResult(newProduct.Adapt<ProductCommandCreateResultDto>());
+            session.Store(newProduct);
+            await session.SaveChangesAsync(cancellationToken);
+            return newProduct.Adapt<ProductCommandCreateResultDto>();
         }
     }
-
-
 }
