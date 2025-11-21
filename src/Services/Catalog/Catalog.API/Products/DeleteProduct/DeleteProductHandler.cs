@@ -1,6 +1,6 @@
 
 
-using Catalog.API.Exceptions;
+using BuildingBlocks.Exceptions;
 
 namespace Catalog.API.Products.DeleteProduct
 {
@@ -11,7 +11,7 @@ namespace Catalog.API.Products.DeleteProduct
         public async Task<Unit> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
             var Product = await session.LoadAsync<Product>(request.ProductId, cancellationToken)
-                ?? throw CustomException.NotFound($"Product With Id: {request.ProductId} Not Found");
+                ?? throw new NotFoundException("Product", $"Id: {request.ProductId}");
             session.Delete(Product);
             await session.SaveChangesAsync(cancellationToken);
             return await Task.FromResult(Unit.Value);

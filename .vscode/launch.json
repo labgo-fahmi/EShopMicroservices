@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "C#: Catalog.API [http]",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}\\src\\Services\\Catalog\\Catalog.API\\Catalog.API.csproj",
+            "launchConfigurationId": "TargetFramework=;http",
+        }
+    ]
+}

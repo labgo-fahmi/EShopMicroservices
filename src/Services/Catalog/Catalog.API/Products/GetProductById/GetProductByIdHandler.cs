@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Catalog.API.Exceptions;
+using BuildingBlocks.Exceptions;
 
 namespace Catalog.API.Products.GetProductById
 {
@@ -28,7 +24,7 @@ namespace Catalog.API.Products.GetProductById
             var product = await session.LoadAsync<Product>(request.ProductId, cancellationToken);
             if (product == null)
             {
-                throw CustomException.NotFound($"Product With Id: {request.ProductId} Not Found");
+                throw new NotFoundException("Product", $"Id: {request.ProductId}");
             }
             return product.Adapt<GetProductByIdResponse>();
         }

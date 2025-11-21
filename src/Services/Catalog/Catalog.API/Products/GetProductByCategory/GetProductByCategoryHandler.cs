@@ -18,7 +18,7 @@ namespace Catalog.API.Products.GetProductByCategoryEndpoint
     }
     public class GetProductByCategoryQuery : IQuery<GetProductsByCategoryResult>
     {
-        public string Category { get; set; } = "";
+        public required string Category { get; set; } = "";
     }
 
     public class GetProductByCategoryHandler(IDocumentSession session) : IQueryHandler<GetProductByCategoryQuery, GetProductsByCategoryResult>
