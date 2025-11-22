@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Catalog.API.Products.GetProducts
 {
-    public class GetProductEndpoint : ICarterModule
+    public record GetProductsRequest(int? PageNumber, int? PageSize);
+
+    public class GetProductsEndpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapGet("/products", async (ISender sender) =>
+            app.MapGet("/products", async ([AsParameters] GetProductsRequest query, ISender sender) =>
             {
-                return await sender.Send(new GetProductsQuery());
-
+                return await sender.Send(query.Adapt<GetProductsQuery>());
             })
             .WithName("GetProducts")
             .Produces<GetProductsResponse>(StatusCodes.Status200OK)
@@ -31,5 +27,9 @@ namespace Catalog.API.Products.GetProducts
     public class GetProductsResponse
     {
         public IEnumerable<GetProductResponse> Products { get; set; } = [];
+        public bool HasNextPage { get; set; } = true;
+        public bool HasPreviousPage { get; set; } = true;
+        public long PageCount { get; set; } = 20L;
+        public long TotalCount { get; set; } = 20L;
     }
 }

@@ -4,6 +4,7 @@
             "name": "C#: Catalog.API [http]",
             "type": "dotnet",
             "request": "launch",
+            "preLaunchTask": "Build: solution",
             "projectPath": "${workspaceFolder}\\src\\Services\\Catalog\\Catalog.API\\Catalog.API.csproj",
             "launchConfigurationId": "TargetFramework=;http",
         }

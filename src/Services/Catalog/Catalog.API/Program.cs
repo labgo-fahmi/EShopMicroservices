@@ -1,8 +1,3 @@
-using BuildingBlocks.Behaviours;
-using BuildingBlocks.Exceptions.Handler;
-using Catalog.API.Core;
-using Catalog.API.Products.CreateProduct;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMarten(opts =>
@@ -10,6 +5,10 @@ builder.Services.AddMarten(opts =>
   opts.Connection(builder.Configuration.GetConnectionString("Default")!);
 }).UseLightweightSessions();
 
+if (builder.Environment.IsDevelopment())
+{
+  builder.Services.InitializeMartenWith<CatalogInitialData>();
+}
 builder.Services.AddCarter(new DependencyContextAssemblyCatalogCustom());
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddMediatR(config =>
