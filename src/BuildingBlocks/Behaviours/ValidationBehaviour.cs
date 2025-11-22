@@ -1,6 +1,7 @@
 using BuildingBlocks.CQRS;
 using FluentValidation;
 using MediatR;
+namespace BuildingBlocks.Behaviours;
 
 public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse> where TRequest : ICommand<TResponse>
 {
@@ -8,10 +9,10 @@ public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRe
     {
         var validationContext = new ValidationContext<TRequest>(request);
         var validationResult = await Task.WhenAll(validators.Select(v => v.ValidateAsync(validationContext)));
-        var validationErrors = validationResult.SelectMany(r => r.Errors.Select(e => e.ErrorMessage));
+        var validationErrors = validationResult.SelectMany(r => r.Errors);
         if (validationErrors.Any())
         {
-            throw new ValidationException(string.Join("\n", validationErrors));
+            throw new ValidationException(validationErrors);
         }
         return await next(cancellationToken);
     }

@@ -1,40 +1,35 @@
-using BuildingBlocks.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+
+namespace BuildingBlocks.Exceptions.Handler;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
 
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(
-            exception, "Exception occurred: {Message}", exception.Message);
-
+        (int statusCode, string message, string title, Dictionary<string, object?>? Extensions) = exception switch
+        {
+            CustomException => (StatusCodes.Status400BadRequest, exception.Message, exception.GetType().Name, null),
+            ValidationException => HandleValidationException(exception),
+            _ => (StatusCodes.Status500InternalServerError, exception.Message, exception.GetType().Name, null)
+        };
         var problemDetails = new ProblemDetails()
         {
-            Status = StatusCodes.Status500InternalServerError,
+            Status = statusCode,
+            Title = title,
+            Detail = message,
+            Instance = httpContext.Request.Path
         };
-        (int statusCode, string message, string title) = exception switch
+        if (Extensions != null)
         {
-            CustomException => (StatusCodes.Status400BadRequest, exception.Message, exception.GetType().Name),
-            ValidationException => (StatusCodes.Status400BadRequest, exception.Message, exception.GetType().Name),
-            _ => (StatusCodes.Status500InternalServerError, exception.Message, exception.GetType().Name)
-        };
-        problemDetails.Status = statusCode;
-        problemDetails.Title = title;
-        problemDetails.Detail = message;
+            problemDetails.Extensions = Extensions;
+        }
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 
@@ -42,5 +37,12 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             .WriteAsJsonAsync(problemDetails, cancellationToken);
 
         return true;
+    }
+
+    private static (int statusCode, string message, string title, Dictionary<string, object?>? Extensions) HandleValidationException(Exception exception)
+    {
+        var errors = (exception as ValidationException)!.Errors.Select(e => new KeyValuePair<string, object>(e.PropertyName, e.ErrorMessage)).ToDictionary();
+        var fieldErrors = new Dictionary<string, object?>() { { "fields", errors } };
+        return (StatusCodes.Status400BadRequest, "One or more invalid fields", exception.GetType().Name, fieldErrors);
     }
 }

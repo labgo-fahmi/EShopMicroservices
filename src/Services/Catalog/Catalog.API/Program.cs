@@ -1,3 +1,5 @@
+using BuildingBlocks.Behaviours;
+using BuildingBlocks.Exceptions.Handler;
 using Catalog.API.Core;
 using Catalog.API.Products.CreateProduct;
 
@@ -14,6 +16,7 @@ builder.Services.AddMediatR(config =>
 {
   config.RegisterServicesFromAssemblyContaining<CreateProductHandler>();
   config.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+  config.AddOpenBehavior(typeof(LoggingBehaviour<,>));
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
