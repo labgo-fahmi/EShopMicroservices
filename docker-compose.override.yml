@@ -4,11 +4,11 @@ services:
       - catalogdb
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTP_PORTS=5000
       - ConnectionStrings__Default=Server=catalogdb;Port=5432;Username=root;Password=root;Database=CatalogDb
     ports:
-      - 6060:8080
-      - 6061:8081
+      - 6000:5000
+      - 6060:5050
   catalogdb:
     environment:
       - POSTGRES_USER=root
@@ -17,4 +17,4 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - postgres_catalog:/var/lib/postgresql/data/ 
+      - ${USERPROFILE}/DevProjects/docker-volumes/postgres-catalog:/var/lib/postgresql/data/ 
